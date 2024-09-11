@@ -22,7 +22,7 @@ import {
   Title,
 } from "@mantine/core";
 
-import { Form, useForm, zodResolver } from "@mantine/form";
+import { useForm, zodResolver } from "@mantine/form";
 import { z } from "zod";
 
 const schema = z
@@ -48,8 +48,14 @@ const schema = z
     }),
     hasCoupon: z.boolean(),
     coupon: z.string(),
-    password: z.string(),
-    confirmPassword: z.string(),
+    password: z
+      .string()
+      .min(6, { message: "Password must contain at least 6 characters" })
+      .max(12, { message: "Password must not exceed 12 characters" }),
+    confirmPassword: z
+      .string()
+      .min(6, { message:"Password must contain at least 6 characters" })
+      .max(12, {message: "Password must not exceed 12 characters" }),
   })
   .refine(
     //refine allows you check error in your own way
@@ -67,8 +73,14 @@ const schema = z
     //set error message and the place it should show
     {
       message: "Invalid coupon code",
-      path: ["confirmPassword"],
+      path: ["coupon"],
     }
+  )
+  .refine((data) => data.password === data.confirmPassword,{
+    message: "Password does not match",
+    path: ["confirmPassword"],
+  }
+
   );
 
 export default function Home() {
@@ -120,8 +132,8 @@ export default function Home() {
         <Space h="lg" />
 
         {/* add form */}
-        <form onSubmit={form.onSubmit((v) => alert("See you at CMU Marathon"))}>
-          <Stack gap="sm">
+        <form onSubmit={form.onSubmit(() => alert("See you at CMU Marathon"))}>
+          <Stack gap="sm">  
             <Group grow align="start">
               <TextInput
                 label="First Name"
@@ -193,7 +205,7 @@ export default function Home() {
           </Stack>
         </form>
 
-        <Footer year={2024} fullName="Teetat yodbun" studentId="660612146" />
+        {<Footer year={2024} fullName="Teetat" studentId="660612146" />}
       </Container>
 
       <TermsAndCondsModal opened={opened} close={close} />
